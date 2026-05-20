@@ -22,7 +22,7 @@ export const initDB = async () => {
         `)
 
         await pool.query(`
-            CREATE TABLE issues (
+            CREATE TABLE IF NOT EXISTS issues (
                 id SERIAL PRIMARY KEY,
 
                 title VARCHAR(150) NOT NULL,
@@ -36,7 +36,7 @@ export const initDB = async () => {
             )
         `)
 
-        console.log("Database connected successfully")
+        // console.log("Database connected successfully")
     } catch (error) {
         console.log(error)
     }
