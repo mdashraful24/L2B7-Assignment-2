@@ -1,0 +1,83 @@
+import bcrypt from "bcryptjs"
+import jwt from "jsonwebtoken"
+import type { IUser } from "./auth.interface"
+import { pool } from "../../db"
+import config from "../../config"
+
+const registerUserIntoDB = async (payload: IUser) => {
+    const { name, email, password, role } = payload
+
+    const hashPassword = await bcrypt.hash(password, 10)
+
+    const result = await pool.query(`
+            INSERT INTO users (name, email, password, role)
+            VALUES ($1, $2, $3, COALESCE($4, 'contributor'))
+            RETURNING *
+        `, [name, email, hashPassword, role]
+    )
+
+    delete result.rows[0].password
+
+    return result
+}
+
+const loginUserIntoDB = async (payload: { email: string, password: string }) => {
+    const { email, password } = payload
+
+    const userData = await pool.query(`
+            SELECT * FROM users WHERE email=$1
+        `, [email]
+    )
+
+    if (userData.rows.length === 0) {
+        throw new Error("Invalid Credentials!")
+    }
+
+    const user = userData.rows[0]
+
+    const matchPassword = await bcrypt.compare(password, user.password)
+
+    if (!matchPassword) {
+        throw new Error("Invalid Credentials!")
+    }
+
+    // Remove password from user object
+    delete user.password
+
+    const jwtPayload = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+    }
+
+    const accessToken = jwt.sign(
+        jwtPayload,
+        config.access_secret,
+        { expiresIn: "1d" }
+    )
+
+    // Truncate token for display only
+    const truncateAccessToken = (token: string): string => {
+        // Split the token by dots and take only the header part
+        const parts = token.split('.')
+
+        if (parts.length >= 1) {
+            return `${parts[0]}...`
+        }
+
+        return token
+    }
+
+    const truncatedNewAccessToken = truncateAccessToken(accessToken)
+
+    return {
+        token: truncatedNewAccessToken,
+        user: user
+    }
+}
+
+export const authService = {
+    registerUserIntoDB,
+    loginUserIntoDB,
+}
