@@ -6,5 +6,6 @@ import { USER_ROLE } from "../../types/express.types";
 const router = Router()
 
 router.post("/", protectedAuth(USER_ROLE.contributor, USER_ROLE.maintainer), issuesController.createIssue)
+router.get("/", issuesController.getAllIssues)
 
 export const issuesRoute = router

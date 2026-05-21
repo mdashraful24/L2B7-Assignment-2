@@ -37,17 +37,52 @@ const createIssue: TypeController = async (req, res) => {
             message: "Issue created successfully",
             data: result.rows[0],
         })
-    } catch (error: any) {
+    } catch (error) {
+        let message = "Something went wrong"
+
+        if (error instanceof Error) {
+            message = error.message
+        }
+
         sendResponse(res, {
             statusCode: 500,
             success: false,
-            message: error.message,
+            message,
             error,
         })
     }
 }
 
+const getAllIssues: TypeController = async (req, res) => {
+    try {
+        const result = await issuesService.getAllIssuesFromDB(req.query)
+
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            // message: "Issues retrieved successfully!",
+            data: result.rows
+        })
+    } catch (error) {
+        let message = "Something went wrong"
+
+        if (error instanceof Error) {
+            message = error.message
+        }
+
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message,
+            error,
+        })
+    }
+}
+
+
+
 export const issuesController = {
     createIssue,
-    
+    getAllIssues,
+
 }

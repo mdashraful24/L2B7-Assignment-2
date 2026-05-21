@@ -1,5 +1,5 @@
 import { pool } from "../../db";
-import type { IIssue } from "./issue.interface";
+import type { IGetIssuesQuery, IIssue } from "./issue.interface";
 
 const createIssueIntoDB = async (payload: IIssue) => {
     const { title, description, type, status, reporter_id } = payload
@@ -14,7 +14,47 @@ const createIssueIntoDB = async (payload: IIssue) => {
     return result
 }
 
+const getAllIssuesFromDB = async (filters: any) => {
+    const sort = filters.sort === "oldest" ? "ASC" : "DESC"
+
+    // Check Both type and status
+    if (filters.type && filters.status) {
+        return await pool.query(`
+            SELECT * FROM issues 
+            WHERE type = $1 AND status = $2 
+            ORDER BY id ${sort}
+        `, [filters.type, filters.status])
+    }
+
+    // Check Only type
+    if (filters.type) {
+        return await pool.query(`
+            SELECT * FROM issues 
+            WHERE type = $1 
+            ORDER BY id ${sort}
+        `, [filters.type])
+    }
+
+    // Check Only status
+    if (filters.status) {
+        return await pool.query(`
+            SELECT * FROM issues 
+            WHERE status = $1 
+            ORDER BY id ${sort}
+        `, [filters.status])
+    }
+
+    // No filters
+    return await pool.query(`
+        SELECT * FROM issues 
+        ORDER BY id ${sort}
+    `)
+}
+
+
+
 export const issuesService = {
     createIssueIntoDB,
-    
+    getAllIssuesFromDB,
+
 }
