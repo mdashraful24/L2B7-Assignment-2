@@ -172,9 +172,9 @@ const updateIssue: TypeController = async (req, res) => {
 
             if (issue.status !== "open") {
                 sendResponse(res, {
-                    statusCode: 403,
+                    statusCode: 409,
                     success: false,
-                    message: "Contributors can only update open issues"
+                    message: "Issue cannot be updated because it is not in an open state"
                 })
                 return
             }
