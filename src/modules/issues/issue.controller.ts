@@ -1,4 +1,5 @@
 import type { TypeController } from "../../types/express.types";
+import { USER_ROLE } from "../../types/express.types";
 import { sendResponse } from "../../utils/sendResponse";
 import { issuesService } from "./issue.service";
 
@@ -132,10 +133,127 @@ const getSingleIssue: TypeController = async (req, res) => {
     }
 }
 
+const updateIssue: TypeController = async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const issueResult = await issuesService.getSingleIssueFromDB(id as string)
+
+        if (issueResult.rows.length === 0) {
+            sendResponse(res, {
+                statusCode: 404,
+                success: false,
+                message: "Issue not found!"
+            })
+            return
+        }
+
+        const issue = issueResult.rows[0]
+        const decodedUser = req.user as { id?: number; role?: string }
+
+        if (!decodedUser?.id || !decodedUser?.role) {
+            sendResponse(res, {
+                statusCode: 401,
+                success: false,
+                message: "Unauthorized request"
+            })
+            return
+        }
+
+        if (decodedUser.role === USER_ROLE.contributor) {
+            if (issue.reporter_id !== decodedUser.id) {
+                sendResponse(res, {
+                    statusCode: 403,
+                    success: false,
+                    message: "Contributors can only update their own issues"
+                })
+                return
+            }
+
+            if (issue.status !== "open") {
+                sendResponse(res, {
+                    statusCode: 403,
+                    success: false,
+                    message: "Contributors can only update open issues"
+                })
+                return
+            }
+        }
+
+        const result = await issuesService.updateIssueFromDB(req.body, id as string)
+
+        if (result.rows.length === 0) {
+            sendResponse(res, {
+                statusCode: 404,
+                success: false,
+                message: "Issue not found!"
+            })
+            return
+        }
+
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: "Issue updated successfully",
+            data: result.rows[0]
+        })
+    } catch (error) {
+        let message = "Something went wrong"
+
+        if (error instanceof Error) {
+            message = error.message
+        }
+
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message,
+            error,
+        })
+    }
+}
+
+const deleteIssue: TypeController = async (req, res) => {
+    const { id } = req.params
+
+    try {
+        const result = await issuesService.deleteIssueFromDB(id as string)
+
+        if (result.rows.length === 0) {
+            sendResponse(res, {
+                statusCode: 404,
+                success: false,
+                message: "Issue not found!"
+            })
+            return
+        }
+
+        sendResponse(res, {
+            statusCode: 200,
+            success: true,
+            message: "Issue deleted successfully"
+        })
+    } catch (error) {
+        let message = "Something went wrong"
+
+        if (error instanceof Error) {
+            message = error.message
+        }
+
+        sendResponse(res, {
+            statusCode: 500,
+            success: false,
+            message,
+            error,
+        })
+    }
+}
+
 
 export const issuesController = {
     createIssue,
     getAllIssues,
     getSingleIssue,
-
+    updateIssue,
+    deleteIssue
 }

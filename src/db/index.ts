@@ -25,8 +25,8 @@ export const initDB = async () => {
             CREATE TABLE IF NOT EXISTS issues (
                 id SERIAL PRIMARY KEY,
 
-                title VARCHAR(150) NOT NULL,
-                description VARCHAR(20) NOT NULL,
+                title VARCHAR(40) NOT NULL,
+                description VARCHAR(150) NOT NULL,
                 type VARCHAR(30) NOT NULL,
                 status VARCHAR(30) NOT NULL DEFAULT 'open',
                 reporter_id INT NOT NULL,
