@@ -49,7 +49,7 @@ const protectedAuth = (...roles: ROLES[]) => {
             req.user = decoded
 
             next()
-        } catch (error: any) {
+        } catch (error) {
             next(error)
         }
     }

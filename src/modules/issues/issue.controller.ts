@@ -1,5 +1,5 @@
 import type { TypeController } from "../../types/express.types";
-import { USER_ROLE } from "../../types/express.types";
+import { normalizeError, USER_ROLE } from "../../types/express.types";
 import { sendResponse } from "../../utils/sendResponse";
 import { issuesService } from "./issue.service";
 
@@ -39,18 +39,14 @@ const createIssue: TypeController = async (req, res) => {
             data: result.rows[0],
         })
     } catch (error) {
-        let message = "Something went wrong"
-
-        if (error instanceof Error) {
-            message = error.message
-        }
+        const err = normalizeError(error);
 
         sendResponse(res, {
             statusCode: 500,
             success: false,
-            message,
-            error,
-        })
+            message: err.message,
+            // error: err,
+        });
     }
 }
 
@@ -75,18 +71,14 @@ const getAllIssues: TypeController = async (req, res) => {
             data: result.rows
         })
     } catch (error) {
-        let message = "Something went wrong"
-
-        if (error instanceof Error) {
-            message = error.message
-        }
+        const err = normalizeError(error);
 
         sendResponse(res, {
             statusCode: 500,
             success: false,
-            message,
-            error,
-        })
+            message: err.message,
+            // error: err,
+        });
     }
 }
 
@@ -129,18 +121,14 @@ const getSingleIssue: TypeController = async (req, res) => {
             data: issue
         })
     } catch (error) {
-        let message = "Something went wrong"
-
-        if (error instanceof Error) {
-            message = error.message
-        }
+        const err = normalizeError(error);
 
         sendResponse(res, {
             statusCode: 500,
             success: false,
-            message,
-            error,
-        })
+            message: err.message,
+            // error: err,
+        });
     }
 }
 
@@ -154,7 +142,8 @@ const updateIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found"
+                message: "Issue not found",
+                data: {}
             })
             return
         }
@@ -197,7 +186,8 @@ const updateIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found"
+                message: "Issue not found",
+                data: {}
             })
             return
         }
@@ -209,18 +199,14 @@ const updateIssue: TypeController = async (req, res) => {
             data: result.rows[0]
         })
     } catch (error) {
-        let message = "Something went wrong"
-
-        if (error instanceof Error) {
-            message = error.message
-        }
+        const err = normalizeError(error);
 
         sendResponse(res, {
             statusCode: 500,
             success: false,
-            message,
-            error,
-        })
+            message: err.message,
+            // error: err,
+        });
     }
 }
 
@@ -234,7 +220,8 @@ const deleteIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found"
+                message: "Issue not found",
+                data: {}
             })
             return
         }
@@ -245,18 +232,14 @@ const deleteIssue: TypeController = async (req, res) => {
             message: "Issue deleted successfully"
         })
     } catch (error) {
-        let message = "Something went wrong"
-
-        if (error instanceof Error) {
-            message = error.message
-        }
+        const err = normalizeError(error);
 
         sendResponse(res, {
             statusCode: 500,
             success: false,
-            message,
-            error,
-        })
+            message: err.message,
+            // error: err,
+        });
     }
 }
 
