@@ -58,10 +58,20 @@ const getAllIssues: TypeController = async (req, res) => {
     try {
         const result = await issuesService.getAllIssuesFromDB(req.query)
 
+        if (result.rows.length === 0) {
+            sendResponse(res, {
+                statusCode: 404,
+                success: false,
+                message: "Issue not found",
+                data: {}
+            })
+            return
+        }
+
         sendResponse(res, {
             statusCode: 200,
             success: true,
-            // message: "Issues retrieved successfully!",
+            message: "Issues retrieved successfully",
             data: result.rows
         })
     } catch (error) {
@@ -90,7 +100,7 @@ const getSingleIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found!",
+                message: "Issue not found",
                 data: {}
             })
             return
@@ -115,6 +125,7 @@ const getSingleIssue: TypeController = async (req, res) => {
         sendResponse(res, {
             statusCode: 200,
             success: true,
+            message: "Issues retrieved successfully",
             data: issue
         })
     } catch (error) {
@@ -143,7 +154,7 @@ const updateIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found!"
+                message: "Issue not found"
             })
             return
         }
@@ -186,7 +197,7 @@ const updateIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found!"
+                message: "Issue not found"
             })
             return
         }
@@ -223,7 +234,7 @@ const deleteIssue: TypeController = async (req, res) => {
             sendResponse(res, {
                 statusCode: 404,
                 success: false,
-                message: "Issue not found!"
+                message: "Issue not found"
             })
             return
         }
