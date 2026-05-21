@@ -1,5 +1,5 @@
 import { Router } from "express";
-import protectedAuth from "../../middleware/auth.protecte";
+import protectedAuth from "../../middleware/auth.protected";
 import { issuesController } from "./issue.controller";
 import { USER_ROLE } from "../../types/express.types";
 

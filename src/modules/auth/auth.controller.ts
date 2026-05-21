@@ -44,6 +44,5 @@ const loginUser: TypeController = async(req, res) => {
 
 export const authController = {
     registerUser,
-    loginUser,
-
+    loginUser
 }

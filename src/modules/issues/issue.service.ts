@@ -1,5 +1,5 @@
 import { pool } from "../../db";
-import type { IGetIssuesQuery, IIssue } from "./issue.interface";
+import type { IIssue } from "./issue.interface";
 
 const createIssueIntoDB = async (payload: IIssue) => {
     const { title, description, type, status, reporter_id } = payload

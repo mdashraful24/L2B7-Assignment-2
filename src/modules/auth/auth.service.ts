@@ -72,7 +72,7 @@ const loginUserIntoDB = async (payload: { email: string, password: string }) => 
     const truncatedNewAccessToken = truncateAccessToken(accessToken)
 
     return {
-        token: accessToken,
+        token: truncatedNewAccessToken,
         user: user
     }
 }
