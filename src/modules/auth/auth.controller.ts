@@ -17,7 +17,7 @@ const registerUser: TypeController = async (req, res) => {
         const err = errorHandle(error);
 
         sendResponse(res, {
-            statusCode: 500,
+            statusCode: err.statusCode || 500,
             success: false,
             message: err.message,
             // error: err,

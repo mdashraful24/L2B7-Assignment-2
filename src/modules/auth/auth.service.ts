@@ -8,6 +8,19 @@ import { SelfError } from "../../utils/errorResponse"
 const registerUserIntoDB = async (payload: IUser) => {
     const { name, email, password, role } = payload
 
+    // Validation
+    if (!name) {
+        throw new SelfError("Full name is required", 400);
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new SelfError("Invalid email format", 400);
+    }
+
+    if (!password) {
+        throw new SelfError("Password is required", 400);
+    }
+
     const hashPassword = await bcrypt.hash(password, 10)
 
     const result = await pool.query(`
@@ -25,9 +38,9 @@ const registerUserIntoDB = async (payload: IUser) => {
 const loginUserIntoDB = async (payload: { email: string, password: string }) => {
     const { email, password } = payload
 
-    const userData = await pool.query(
-        `SELECT * FROM users WHERE email=$1`,
-        [email]
+    const userData = await pool.query(`
+        SELECT * FROM users WHERE email=$1`
+        , [email]
     )
 
     // User not found
@@ -53,12 +66,28 @@ const loginUserIntoDB = async (payload: { email: string, password: string }) => 
         role: user.role
     }
 
-    const accessToken = jwt.sign(jwtPayload, config.access_secret, {
-        expiresIn: "1d"
-    })
+    const accessToken = jwt.sign(
+        jwtPayload,
+        config.access_secret,
+        { expiresIn: "1d" }
+    )
+
+    // Truncate token for display only
+    const truncateAccessToken = (token: string): string => {
+        // Split the token by dots and take only the header part (Assignment Requirements)
+        const parts = token.split('.')
+
+        if (parts.length >= 1) {
+            return `${parts[0]}...`
+        }
+
+        return token
+    }
+
+    const truncatedNewAccessToken = truncateAccessToken(accessToken)
 
     return {
-        token: accessToken,
+        token: truncatedNewAccessToken,
         user
     }
 }
