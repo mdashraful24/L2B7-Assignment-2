@@ -6,7 +6,7 @@ export interface IIssue {
     status?: "open" | "in_progress" | "resolved";
 }
 
-export interface IGetIssuesQuery {
+export interface IGetIssuesQueryStructure {
     sort?: 'newest' | 'oldest';
     type?: 'bug' | 'feature_request';
     status?: 'open' | 'in_progress' | 'resolved';

@@ -1,9 +1,11 @@
 import { pool } from "../../db";
-import type { IGetIssuesQuery, IIssue } from "./issue.interface";
+import type { IGetIssuesQueryStructure, IIssue } from "./issue.interface";
 
 const createIssueIntoDB = async (payload: IIssue) => {
+
     const { title, description, type, status, reporter_id } = payload
 
+    // Create a new issues with details
     const result = await pool.query(`
             INSERT INTO issues (title, description, type, status, reporter_id)
             VALUES ($1, $2, $3, COALESCE($4, 'open'), $5) RETURNING *
@@ -13,78 +15,36 @@ const createIssueIntoDB = async (payload: IIssue) => {
     return result
 }
 
-const getAllIssuesFromDB = async (filters: IGetIssuesQuery) => {
+const getAllIssuesFromDB = async (filters: IGetIssuesQueryStructure) => {
+
     const sort = filters.sort === "oldest" ? "ASC" : "DESC"
-    
-    // This is a string template, NOT an executed query
-    const baseQuery = `
-        SELECT
-            issues.id,
-            issues.title,
-            issues.description,
-            issues.type,
-            issues.status,
-            issues.created_at,
-            issues.updated_at,
-            
-            users.id AS reporter_id,
-            users.name AS reporter_name,
-            users.role AS reporter_role
-        FROM issues
-        LEFT JOIN users ON issues.reporter_id = users.id
-    `
 
-    // Check Both type and status
-    if (filters.type && filters.status) {
-        return await pool.query(`
-            ${baseQuery}
-            WHERE issues.type = $1 AND issues.status = $2 
-            ORDER BY issues.id ${sort}
-        `, [filters.type, filters.status])
-    }
+    // Get all issues with optional type/status filters with reporter details via subquery
+    const result = await pool.query(`
+            SELECT id, title, description, type, status, reporter_id,
+                (SELECT name FROM users WHERE users.id = issues.reporter_id) AS reporter_name,
+                (SELECT role FROM users WHERE users.id = issues.reporter_id) AS reporter_role,
+                created_at, updated_at
+            FROM issues
+            WHERE ($1::text IS NULL OR type = $1)
+            AND ($2::text IS NULL OR status = $2)
+            ORDER BY id ${sort}
+        `, [filters.type || null, filters.status || null]
+    )
 
-    // Check Only type
-    if (filters.type) {
-        return await pool.query(`
-            ${baseQuery}
-            WHERE issues.type = $1 
-            ORDER BY issues.id ${sort}
-        `, [filters.type])
-    }
-
-    // Check Only status
-    if (filters.status) {
-        return await pool.query(`
-            ${baseQuery}
-            WHERE issues.status = $1 
-            ORDER BY issues.id ${sort}
-        `, [filters.status])
-    }
-
-    // No filters
-    return await pool.query(`
-        ${baseQuery}
-        ORDER BY issues.id ${sort}
-    `)
+    return result
 }
 
 const getSingleIssueFromDB = async (id: string) => {
+
+    // Get single issues with reporter details via subquery
     const result = await pool.query(`
-            SELECT
-                issues.id,
-                issues.title,
-                issues.description,
-                issues.type,
-                issues.status,
-                issues.created_at,
-                issues.updated_at,
-                
-                users.id AS reporter_id,
-                users.name AS reporter_name,
-                users.role AS reporter_role
+            SELECT id, title, description, type, status, reporter_id,
+                (SELECT name FROM users WHERE users.id = issues.reporter_id) AS reporter_name,
+                (SELECT role FROM users WHERE users.id = issues.reporter_id) AS reporter_role,
+                created_at, updated_at
             FROM issues
-            LEFT JOIN users ON issues.reporter_id = users.id
-            WHERE issues.id = $1
+            WHERE id = $1
         `, [id]
     )
 
@@ -95,6 +55,7 @@ const updateIssueFromDB = async (payload: IIssue, id: string) => {
 
     const { title, description, type, status } = payload
 
+    // Update single issue details
     const result = await pool.query(`
             UPDATE issues SET
                 title=COALESCE($1,title),
@@ -109,6 +70,8 @@ const updateIssueFromDB = async (payload: IIssue, id: string) => {
 }
 
 const deleteIssueFromDB = async (id: string) => {
+
+    // Delete single issue
     const result = await pool.query(`
             DELETE FROM issues WHERE id=$1 RETURNING *
         `, [id]
@@ -116,7 +79,6 @@ const deleteIssueFromDB = async (id: string) => {
 
     return result
 }
-
 
 export const issuesService = {
     createIssueIntoDB,

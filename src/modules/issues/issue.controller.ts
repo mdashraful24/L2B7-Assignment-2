@@ -5,6 +5,7 @@ import type { IFormattedIssueRow } from "./issue.interface";
 import { issuesService } from "./issue.service";
 
 const createIssue: TypeController = async (req, res) => {
+
     try {
         const { title, description, type } = req.body
 
@@ -52,6 +53,7 @@ const createIssue: TypeController = async (req, res) => {
 }
 
 const getAllIssues: TypeController = async (req, res) => {
+
     try {
         const result = await issuesService.getAllIssuesFromDB(req.query)
 
@@ -65,7 +67,7 @@ const getAllIssues: TypeController = async (req, res) => {
             return
         }
 
-        // Format each issue and nested reporter info
+        // Format each issue with reporter details
         const formattedIssues = result.rows.map((row: IFormattedIssueRow) => ({
             id: row.id,
             title: row.title,
@@ -100,6 +102,7 @@ const getAllIssues: TypeController = async (req, res) => {
 }
 
 const getSingleIssue: TypeController = async (req, res) => {
+
     const { id } = req.params
 
     try {
@@ -116,7 +119,9 @@ const getSingleIssue: TypeController = async (req, res) => {
         }
 
         const row = result.rows[0]
-        const issue = {
+
+        // Format issue with reporter details
+        const formateSingleIssue = {
             id: row.id,
             title: row.title,
             description: row.description,
@@ -135,7 +140,7 @@ const getSingleIssue: TypeController = async (req, res) => {
             statusCode: 200,
             success: true,
             message: "Issue retrieved successfully",
-            data: issue
+            data: formateSingleIssue
         })
     } catch (error) {
         const err = normalizeError(error);
@@ -150,6 +155,7 @@ const getSingleIssue: TypeController = async (req, res) => {
 }
 
 const updateIssue: TypeController = async (req, res) => {
+
     const { id } = req.params
 
     try {
@@ -228,6 +234,7 @@ const updateIssue: TypeController = async (req, res) => {
 }
 
 const deleteIssue: TypeController = async (req, res) => {
+
     const { id } = req.params
 
     try {
@@ -259,7 +266,6 @@ const deleteIssue: TypeController = async (req, res) => {
         });
     }
 }
-
 
 export const issuesController = {
     createIssue,
