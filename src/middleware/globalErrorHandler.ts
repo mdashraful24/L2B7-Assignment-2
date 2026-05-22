@@ -1,11 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
+import { errorHandle } from "../utils/errorResponse";
 
 const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-    // console.error(err.stack);
+    const { message, statusCode } = errorHandle(err);
 
-    res.status(500).json({
+    res.status(statusCode ?? 500).json({
         success: false,
-        message: err.message || "Internal Server Error",
+        message,
     });
 }
 

@@ -1,5 +1,6 @@
 import { type TypeController } from "../../types/express.types";
-import { normalizeError, sendResponse } from "../../utils/sendResponse";
+import { errorHandle } from "../../utils/errorResponse";
+import { sendResponse } from "../../utils/sendResponse";
 import { authService } from "./auth.service";
 
 const registerUser: TypeController = async (req, res) => {
@@ -13,7 +14,7 @@ const registerUser: TypeController = async (req, res) => {
             data: result.rows[0],
         });
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
             statusCode: 500,
@@ -35,10 +36,10 @@ const loginUser: TypeController = async(req, res) => {
             data: result,
         });
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
-            statusCode: 500,
+            statusCode: err.statusCode || 500,
             success: false,
             message: err.message,
             // error: err,

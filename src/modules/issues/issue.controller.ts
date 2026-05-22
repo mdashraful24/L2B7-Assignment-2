@@ -1,6 +1,7 @@
 import type { TypeController } from "../../types/express.types";
 import { USER_ROLE } from "../../types/express.types";
-import { normalizeError, sendResponse } from "../../utils/sendResponse";
+import { errorHandle, SelfError } from "../../utils/errorResponse";
+import { sendResponse } from "../../utils/sendResponse";
 import type { IFormattedIssueRow } from "./issue.interface";
 import { issuesService } from "./issue.service";
 
@@ -10,23 +11,13 @@ const createIssue: TypeController = async (req, res) => {
         const { title, description, type } = req.body
 
         if (!title || !description || !type) {
-            sendResponse(res, {
-                statusCode: 400,
-                success: false,
-                message: "Title, description, and type are required"
-            })
-            return
+            throw new SelfError("Title, description, and type are required", 400)
         }
 
         const decodedUser = req.user as { id?: number }
 
         if (!decodedUser?.id) {
-            sendResponse(res, {
-                statusCode: 401,
-                success: false,
-                message: "Unauthorized request"
-            })
-            return
+            throw new SelfError("Unauthorized request", 401)
         }
 
         const result = await issuesService.createIssueIntoDB({
@@ -41,10 +32,10 @@ const createIssue: TypeController = async (req, res) => {
             data: result.rows[0],
         })
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
-            statusCode: 500,
+            statusCode: err.statusCode || 500,
             success: false,
             message: err.message,
             // error: err,
@@ -90,7 +81,7 @@ const getAllIssues: TypeController = async (req, res) => {
             data: formattedIssues
         })
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
             statusCode: 500,
@@ -143,7 +134,7 @@ const getSingleIssue: TypeController = async (req, res) => {
             data: formateSingleIssue
         })
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
             statusCode: 500,
@@ -175,31 +166,16 @@ const updateIssue: TypeController = async (req, res) => {
         const decodedUser = req.user as { id?: number; role?: string }
 
         if (!decodedUser?.id || !decodedUser?.role) {
-            sendResponse(res, {
-                statusCode: 401,
-                success: false,
-                message: "Unauthorized request"
-            })
-            return
+            throw new SelfError("Unauthorized request", 401)
         }
 
         if (decodedUser.role === USER_ROLE.contributor) {
             if (issue.reporter_id !== decodedUser.id) {
-                sendResponse(res, {
-                    statusCode: 403,
-                    success: false,
-                    message: "Contributors can only update their own issues"
-                })
-                return
+                throw new SelfError("Contributors can only update their own issues", 403)
             }
 
             if (issue.status !== "open") {
-                sendResponse(res, {
-                    statusCode: 409,
-                    success: false,
-                    message: "Only open issues can be updated by contributors"
-                })
-                return
+                throw new SelfError("Only open issues can be updated by contributors", 409)
             }
         }
 
@@ -222,10 +198,10 @@ const updateIssue: TypeController = async (req, res) => {
             data: result.rows[0]
         })
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
-            statusCode: 500,
+            statusCode: err.statusCode || 500,
             success: false,
             message: err.message,
             // error: err,
@@ -256,7 +232,7 @@ const deleteIssue: TypeController = async (req, res) => {
             message: "Issue deleted successfully"
         })
     } catch (error) {
-        const err = normalizeError(error);
+        const err = errorHandle(error);
 
         sendResponse(res, {
             statusCode: 500,
