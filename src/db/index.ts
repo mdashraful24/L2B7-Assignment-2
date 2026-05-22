@@ -25,16 +25,22 @@ export const initDB = async () => {
             CREATE TABLE IF NOT EXISTS issues (
                 id SERIAL PRIMARY KEY,
 
-                title VARCHAR(40) NOT NULL,
-                description VARCHAR(150) NOT NULL,
-                type VARCHAR(30) NOT NULL,
-                status VARCHAR(30) NOT NULL DEFAULT 'open',
+                title VARCHAR(150) NOT NULL CHECK (LENGTH(title) <= 150),
+                description TEXT NOT NULL CHECK (LENGTH(description) >= 20),
+
+                type VARCHAR(30) NOT NULL 
+                    CHECK (type IN ('bug', 'feature_request')),
+
+                status VARCHAR(30) NOT NULL 
+                    DEFAULT 'open'
+                    CHECK (status IN ('open', 'in_progress', 'resolved')),
+
                 reporter_id INT NOT NULL,
 
                 created_at TIMESTAMP DEFAULT NOW(),
                 updated_at TIMESTAMP DEFAULT NOW()
             )
-        `)
+        `);
 
         // console.log("Database connected successfully")
     } catch (error) {

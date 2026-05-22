@@ -1,6 +1,7 @@
 import type { TypeController } from "../../types/express.types";
-import { normalizeError, USER_ROLE } from "../../types/express.types";
-import { sendResponse } from "../../utils/sendResponse";
+import { USER_ROLE } from "../../types/express.types";
+import { normalizeError, sendResponse } from "../../utils/sendResponse";
+import type { IFormattedIssueRow } from "./issue.interface";
 import { issuesService } from "./issue.service";
 
 const createIssue: TypeController = async (req, res) => {
@@ -64,11 +65,27 @@ const getAllIssues: TypeController = async (req, res) => {
             return
         }
 
+        // Format each issue and nested reporter info
+        const formattedIssues = result.rows.map((row: IFormattedIssueRow) => ({
+            id: row.id,
+            title: row.title,
+            description: row.description,
+            type: row.type,
+            status: row.status,
+            reporter: row.reporter_id ? {
+                id: row.reporter_id,
+                name: row.reporter_name,
+                role: row.reporter_role,
+            } : null,
+            created_at: row.created_at,
+            updated_at: row.updated_at,
+        }))
+
         sendResponse(res, {
             statusCode: 200,
             success: true,
             message: "Issues retrieved successfully",
-            data: result.rows
+            data: formattedIssues
         })
     } catch (error) {
         const err = normalizeError(error);
@@ -117,7 +134,7 @@ const getSingleIssue: TypeController = async (req, res) => {
         sendResponse(res, {
             statusCode: 200,
             success: true,
-            message: "Issues retrieved successfully",
+            message: "Issue retrieved successfully",
             data: issue
         })
     } catch (error) {

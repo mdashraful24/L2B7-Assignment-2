@@ -13,23 +13,3 @@ export const USER_ROLE = {
 
 
 export type ROLES = "contributor" | "maintainer"
-
-
-export const normalizeError = (error: unknown): Error => {
-    if (error instanceof Error) return error;
-    return new Error("Something went wrong");
-};
-
-
-// let message = "Something went wrong"
-
-//         if (error instanceof Error) {
-//             message = error.message
-//         }
-
-//         sendResponse(res, {
-//             statusCode: 500,
-//             success: false,
-//             message,
-//             error,
-//         })

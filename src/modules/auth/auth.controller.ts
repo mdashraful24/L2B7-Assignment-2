@@ -1,5 +1,5 @@
-import { normalizeError, type TypeController } from "../../types/express.types";
-import { sendResponse } from "../../utils/sendResponse";
+import { type TypeController } from "../../types/express.types";
+import { normalizeError, sendResponse } from "../../utils/sendResponse";
 import { authService } from "./auth.service";
 
 const registerUser: TypeController = async (req, res) => {
