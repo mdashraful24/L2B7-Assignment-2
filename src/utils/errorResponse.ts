@@ -30,3 +30,17 @@ export const errorHandle = (error: unknown): ErrorHandleType => {
         message: "Something went wrong",
     }
 }
+
+
+// let message = "Something went wrong"
+
+//         if (error instanceof Error) {
+//             message = error.message
+//         }
+
+//         sendResponse(res, {
+//             statusCode: 500,
+//             success: false,
+//             message,
+//             error,
+//         })

@@ -1,9 +1,23 @@
 import { pool } from "../../db";
+import { SelfError } from "../../utils/errorResponse";
 import type { IGetIssuesQueryStructure, IIssue } from "./issue.interface";
 
 const createIssueIntoDB = async (payload: IIssue) => {
 
     const { title, description, type, status, reporter_id } = payload
+
+    // All required validation
+    if (!title || title.length > 150) {
+        throw new SelfError("Title are required and must be at most 150 characters", 400)
+    }
+
+    if (!description || description.length < 20) {
+        throw new SelfError("Description are required and must be at least 20 characters", 400)
+    }
+
+    if (!type) {
+        throw new SelfError("Type are required", 400)
+    }
 
     // Create a new issues with details
     const result = await pool.query(`
@@ -54,6 +68,19 @@ const getSingleIssueFromDB = async (id: string) => {
 const updateIssueFromDB = async (payload: IIssue, id: string) => {
 
     const { title, description, type, status } = payload
+
+    // All required validation
+    if (title !== undefined && title.length > 150) {
+        throw new SelfError("Title must be at most 150 characters", 400)
+    }
+
+    if (description !== undefined && description.length < 20) {
+        throw new SelfError("Description must be at least 20 characters", 400)
+    }
+
+    if (type !== undefined && !type) {
+        throw new SelfError("Type cannot be empty", 400)
+    }
 
     // Update single issue details
     const result = await pool.query(`

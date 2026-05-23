@@ -8,12 +8,6 @@ import { issuesService } from "./issue.service";
 const createIssue: TypeController = async (req, res) => {
 
     try {
-        const { title, description, type } = req.body
-
-        if (!title || !description || !type) {
-            throw new SelfError("Title, description, and type are required", 400)
-        }
-
         const decodedUser = req.user as { id?: number }
 
         if (!decodedUser?.id) {
@@ -31,6 +25,7 @@ const createIssue: TypeController = async (req, res) => {
             message: "Issue created successfully",
             data: result.rows[0],
         })
+
     } catch (error) {
         const err = errorHandle(error);
 

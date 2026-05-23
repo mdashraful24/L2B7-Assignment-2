@@ -72,22 +72,8 @@ const loginUserIntoDB = async (payload: { email: string, password: string }) => 
         { expiresIn: "1d" }
     )
 
-    // Truncate token for display only
-    const truncateAccessToken = (token: string): string => {
-        // Split the token by dots and take only the header part (Assignment Requirements)
-        const parts = token.split('.')
-
-        if (parts.length >= 1) {
-            return `${parts[0]}...`
-        }
-
-        return token
-    }
-
-    const truncatedNewAccessToken = truncateAccessToken(accessToken)
-
     return {
-        token: truncatedNewAccessToken,
+        token: accessToken,
         user
     }
 }
