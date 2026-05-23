@@ -32,6 +32,7 @@ export const errorHandle = (error: unknown): ErrorHandleType => {
 }
 
 
+// ? Store code but not use
 // let message = "Something went wrong"
 
 //         if (error instanceof Error) {
