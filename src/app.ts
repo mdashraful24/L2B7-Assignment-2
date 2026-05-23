@@ -17,7 +17,7 @@ app.get('/', (req: Request, res: Response) => {
         statusCode: 200,
         success: true,
         message: "DevPulse Project!",
-        author: "AIR"
+        author: "Ashraful Islam Ratul"
     });
 })
 
